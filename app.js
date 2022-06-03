@@ -31,9 +31,7 @@ const userSchema = new mongoose.Schema({
     },
     phone :{
         type : Number,
-        required : true,
-        // min : 10,
-        // max : 10
+        required : true
     },
     email : {
         type : String,
@@ -64,39 +62,31 @@ passport.deserializeUser(function(id, done) {
 //      R O U T E S
 //=======================
 
-app.get("/",(req,res)=>{
-    res.send();
-});
+// app.get("/",(req,res)=>{
+//     res.send();
+// });
 
-app.get("/logout",(req,res)=>{
-    req.logout((err)=>{
-        if(err){
-            console.log(err);
-        }else{
-            res.redirect("/");
-        }
-    });
-});
+// app.get("/logout",(req,res)=>{
+//     req.logout((err)=>{
+//         if(err){
+//             console.log(err);
+//         }else{
+//             res.redirect("/");
+//         }
+//     });
+// });
 
 app.post("/register",(req,res)=>{
-    
-    User.register(new User({username: req.body.username,email:req.body.email,phone:req.body.phone,password : req.body.password}),req.body.password,function(err,user){
-        if(err){
-            console.log(err);
-            res.send({status:false});
-        }
-        else{
-            passport.authenticate("local")(req,res,()=>{
-                User.findOne({username : req.body.username},(err,result)=>{
-                    if(!err){
-                        res.send(result);
-                    }else{
-                        console.log(err);
-                    }
-                })
-            })   
-        } 
-    })
+    User.register(new User({username: req.body.username , phone:req.body.phone , email:req.body.email ,password : req.body.password,active : false}),req.body.password,(err, user) => {
+            // console.log(user);
+            if (err) {
+                console.log(err);
+                res.send({ status: false });
+            }
+            passport.authenticate("local")(req,res,function(){
+                res.send(user);
+            }) 
+        });
 });
 app.post("/login",(req,res)=>{
     const user = new User({
@@ -120,4 +110,4 @@ app.post("/login",(req,res)=>{
     });
 });
 
-app.listen("3000",()=>{console.log("Server Up and Running.")})
+app.listen(process.env.PORT || 3000,()=>{console.log("Server Up and Running.")})
